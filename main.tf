@@ -10,9 +10,9 @@ module "terraform_state_backend" {
   name       = "bucket"
   attributes = ["2138"]
 
-  terraform_backend_config_file_path = ""
+  terraform_backend_config_file_path = "."
   terraform_backend_config_file_name = "backend.tf"
-  force_destroy                      = true
+  force_destroy                      = false
 
 
 }
@@ -28,7 +28,7 @@ module "vpc" {
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 
   enable_nat_gateway                 = true
-  one_nat_gateway_per_az=true
+  one_nat_gateway_per_az             = true
   create_database_subnet_route_table = true
   tags = {
 
@@ -55,6 +55,83 @@ module "web_server_ssh_allowance_sg" {
   ingress_cidr_blocks = ["0.0.0.0/0"]
   egress_cidr_blocks  = ["0.0.0.0/0"]
 }
+
+module "alb" {
+  source                     = "terraform-aws-modules/alb/aws"
+  name                       = "terraform-alb-2138"
+  vpc_id                     = module.vpc.vpc_id
+  subnets                    = module.vpc.public_subnets
+  enable_deletion_protection = false
+
+  security_group_ingress_rules = {
+    all_http = {
+      from_port   = 80
+      to_port     = 80
+      ip_protocol = "tcp"
+      description = "HTTP web traffic"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+
+  }
+
+  security_group_egress_rules = {
+    all = {
+
+      ip_protocol = "-1"
+      cidr_ipv4   = "10.0.0.0/16"
+
+    }
+
+  }
+
+  listeners = {
+
+    http = {
+      port     = 80
+      protocol = "HTTP"
+      forward = {
+        target_group_key = "ec2-instances"
+
+      }
+
+
+    }
+
+
+  }
+
+  target_groups = {
+    ec2-instances = {
+
+      protocol          = "HTTP"
+      port              = 80
+      target_type       = "instance"
+      target_id         = aws_instance.myInstance[0].id
+      create_attachment = true
+
+
+    }
+
+
+  }
+
+  additional_target_group_attachments = {
+    instance-1 = {
+      target_group_key = "ec2-instances"
+      target_id        = aws_instance.myInstance[1].id
+      port             = 80
+    }
+    instance-2 = {
+      target_group_key = "ec2-instances"
+      target_id        = aws_instance.myInstance[2].id
+      port             = 80
+    }
+  }
+
+
+
+}
+
 
 data "aws_ami" "al2023" {
 
