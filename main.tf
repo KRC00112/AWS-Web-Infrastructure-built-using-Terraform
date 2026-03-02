@@ -10,9 +10,9 @@ module "terraform_state_backend" {
   name       = "bucket"
   attributes = ["2138"]
 
-  terraform_backend_config_file_path = ""
+  terraform_backend_config_file_path = "."
   terraform_backend_config_file_name = "backend.tf"
-  force_destroy                      = true
+  force_destroy                      = false
 
 
 }
