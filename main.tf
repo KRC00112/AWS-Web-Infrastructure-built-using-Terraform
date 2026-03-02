@@ -10,9 +10,9 @@ module "terraform_state_backend" {
   name       = "bucket"
   attributes = ["2138"]
 
-  terraform_backend_config_file_path = "."
+  terraform_backend_config_file_path = ""
   terraform_backend_config_file_name = "backend.tf"
-  force_destroy                      = false
+  force_destroy                      = true
 
 
 }
@@ -82,10 +82,10 @@ resource "aws_key_pair" "myKey" {
 
 
 resource "aws_instance" "myInstance" {
-
+  count                       = 3
   ami                         = data.aws_ami.al2023.id
   instance_type               = "t3.micro"
-  subnet_id                   = module.vpc.public_subnets[0]
+  subnet_id                   = module.vpc.public_subnets[count.index]
   vpc_security_group_ids      = [module.web_server_http_allowance_sg.security_group_id, module.web_server_ssh_allowance_sg.security_group_id]
   associate_public_ip_address = true
   key_name                    = aws_key_pair.myKey.key_name
@@ -93,7 +93,7 @@ resource "aws_instance" "myInstance" {
   user_data_replace_on_change = true
   tags = {
 
-    Name = "myAl2023Instance"
+    Name = "myAl2023Instance-${count.index}"
 
   }
 

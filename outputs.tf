@@ -38,6 +38,6 @@ output "aws_ami" {
 
 output "aws_instance" {
 
-  value = resource.aws_instance.myInstance.id
+  value = [resource.aws_instance.myInstance[0].id, resource.aws_instance.myInstance[1].id, resource.aws_instance.myInstance[2].id]
 
 }
