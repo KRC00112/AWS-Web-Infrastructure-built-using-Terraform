@@ -133,9 +133,8 @@ terraform destroy
 
 ## Security Notes
 
-- SSH ingress is currently open to `0.0.0.0/0` — restrict this to a known IP range or bastion host for any non-demo deployment
+- SSH ingress is currently open to `0.0.0.0/0`. Rstrict this to a known IP range.
 - EC2 instances live in **private** subnets and are not directly reachable from the internet; SSH access requires a bastion host or AWS SSM Session Manager
-- ALB egress is scoped to the VPC CIDR (`10.0.0.0/16`)
 
 ---
 
